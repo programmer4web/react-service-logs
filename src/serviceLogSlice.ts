@@ -122,6 +122,7 @@ const slice = createSlice({
       const draft = { ...state.drafts[draftIndex] };
       (draft as any)[field] = value;
       draft.isDirty = true;
+      draft.lastSaved = new Date().toISOString();
 
       // keep end date in sync when startDate changed
       if (field === 'startDate' && value) {
@@ -132,8 +133,9 @@ const slice = createSlice({
       }
 
       state.drafts[draftIndex] = draft;
-      if (state.currentDraft?.id === id) state.currentDraft = draft;
-      state.saveStatus = 'saving';
+      if (state.currentDraft?.id === id) {
+        state.currentDraft = draft;
+      }
     },
 
     deleteDraft(state, action: PayloadAction<string>) {
@@ -166,6 +168,7 @@ const slice = createSlice({
       state.drafts = state.drafts.filter(d => d.id !== state.currentDraft!.id);
       state.currentDraft = null;
       state.validationErrors = [];
+      state.saveStatus = 'saved';
     },
 
     setEditingLog(state, action: PayloadAction<ServiceLog | null>) {
@@ -198,7 +201,7 @@ const slice = createSlice({
       state.serviceLogs = state.serviceLogs.map(l => (l.id === state.editingLog!.id ? state.editingLog! : l));
       state.editingLog = null;
       state.showFilters = false;
-      state.saveStatus = 'idle';
+      state.saveStatus = 'saved';
       state.validationErrors = [];
     },
 
@@ -234,11 +237,19 @@ const slice = createSlice({
 
     // Persistence helper: mark a draft saved
     markDraftSaved(state, action: PayloadAction<{ id: string; lastSaved?: string }>) {
-      const d = state.drafts.find(x => x.id === action.payload.id);
-      if (!d) return;
-      d.isDirty = false;
-      d.lastSaved = action.payload.lastSaved ?? new Date().toISOString();
-      if (state.currentDraft?.id === d.id) state.currentDraft = d;
+      const draftIndex = state.drafts.findIndex(d => d.id === action.payload.id);
+      if (draftIndex === -1) return;
+      
+      const updatedDraft = {
+        ...state.drafts[draftIndex],
+        isDirty: false,
+        lastSaved: action.payload.lastSaved ?? new Date().toISOString()
+      };
+      
+      state.drafts[draftIndex] = updatedDraft;
+      if (state.currentDraft?.id === action.payload.id) {
+        state.currentDraft = updatedDraft;
+      }
     }
   }
 });
@@ -269,12 +280,12 @@ export const persistToLocalStorage = (state: RootStateServiceLog) => {
   try {
     const toSave = {
       serviceLogs: state.serviceLogs,
-      drafts: state.drafts.map(d => ({ ...d, isDirty: false })),
-      currentDraft: state.currentDraft ? { ...state.currentDraft, isDirty: false } : null
+      drafts: state.drafts,
+      currentDraft: state.currentDraft
     };
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(toSave));
   } catch (err) {
-    // ignore
+    console.error('Failed to persist to localStorage:', err);
   }
 };
 
@@ -284,6 +295,7 @@ export const loadFromLocalStorage = (): Partial<RootStateServiceLog> | null => {
     if (!raw) return null;
     return JSON.parse(raw);
   } catch (err) {
+    console.error('Failed to load from localStorage:', err);
     return null;
   }
 };

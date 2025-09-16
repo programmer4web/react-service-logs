@@ -42,31 +42,43 @@ import {
 export const ServiceLogManager: React.FC = () => {
   const state = useSelector((s: RootState) => s.serviceLog);
   const dispatch = useDispatch<AppDispatch>();
+  const [isInitialLoad, setIsInitialLoad] = React.useState(true);
 
   // load persisted state once
   useEffect(() => {
     const persisted = loadFromLocalStorage();
-    if (persisted) dispatch(loadFromStorage(persisted));
+    if (persisted) {
+      dispatch(loadFromStorage(persisted));
+    }
+    setIsInitialLoad(false);
   }, [dispatch]);
 
-  // persist on changes to critical slices
+  // persist to localStorage on any state change (except initial load)
   useEffect(() => {
+    if (isInitialLoad) return;
     persistToLocalStorage(state);
-  }, [state.serviceLogs, state.drafts, state.currentDraft]);
+  }, [state, isInitialLoad]);
 
-  // simple auto-save simulation for drafts: when a draft becomes dirty, mark saving -> saved
+  // auto-save drafts with debouncing
   useEffect(() => {
-    if (!state.currentDraft) return;
-    if (!state.currentDraft.isDirty) return;
+    if (!state.currentDraft?.isDirty) return;
 
     dispatch(setSaveStatus('saving'));
-    const t = window.setTimeout(() => {
-      dispatch(markDraftSaved({ id: state.currentDraft!.id }));
+    const draftId = state.currentDraft.id;
+    
+    const saveTimer = setTimeout(() => {
+      dispatch(markDraftSaved({ id: draftId }));
       dispatch(setSaveStatus('saved'));
-      window.setTimeout(() => dispatch(setSaveStatus('idle')), 1500);
-    }, 600);
-    return () => clearTimeout(t);
-  }, [state.currentDraft?.isDirty, dispatch]);
+      
+      const resetTimer = setTimeout(() => {
+        dispatch(setSaveStatus('idle'));
+      }, 2000);
+      
+      return () => clearTimeout(resetTimer);
+    }, 1000);
+
+    return () => clearTimeout(saveTimer);
+  }, [state.currentDraft?.isDirty, state.currentDraft?.id, dispatch]);
 
   const getSaveStatusIcon = () => {
     switch (state.saveStatus) {
@@ -124,8 +136,15 @@ export const ServiceLogManager: React.FC = () => {
             <h2 className="text-lg font-semibold text-gray-900">Service Log Form</h2>
             <div className="flex items-center space-x-2">
               {getSaveStatusIcon()}
-              {state.saveStatus === 'saving' && <span className="text-sm text-yellow-600">Auto-saving draft...</span>}
-              {state.saveStatus === 'saved' && <span className="text-sm text-green-600">Draft saved</span>}
+              {state.saveStatus === 'saving' && (
+                <span className="text-sm text-yellow-600 font-medium">Auto-saving draft...</span>
+              )}
+              {state.saveStatus === 'saved' && (
+                <span className="text-sm text-green-600 font-medium">✓ Draft saved</span>
+              )}
+              {state.currentDraft && !state.currentDraft.isDirty && state.saveStatus === 'idle' && (
+                <span className="text-sm text-gray-500">All changes saved</span>
+              )}
             </div>
           </div>
 
