@@ -1,6 +1,7 @@
 const resolve = require('@rollup/plugin-node-resolve');
 const commonjs = require('@rollup/plugin-commonjs');
 const babel = require('@rollup/plugin-babel');
+const typescript = require('@rollup/plugin-typescript');
 const terser = require('@rollup/plugin-terser');
 const peerDepsExternal = require('rollup-plugin-peer-deps-external');
 const json = require('@rollup/plugin-json');
@@ -39,15 +40,23 @@ module.exports = [
       
       // CSS is already compiled by the build:css script before rollup runs
       
-      // Resolve node_modules
+      // Resolve node_modules first
       resolve({
-        extensions: ['.js', '.jsx']
+        extensions: ['.js', '.jsx', '.ts', '.tsx']
+      }),
+      
+      // Handle TypeScript files
+      typescript({
+        tsconfig: './tsconfig.json',
+        exclude: ['**/*.test.*', '**/*.spec.*'],
+        sourceMap: true,
+        inlineSources: true
       }),
       
       // Convert CommonJS modules to ES6
       commonjs(),
       
-      // Transpile with Babel for JS/JSX files
+      // Transpile with Babel for JS/JSX files (TypeScript handled above)
       babel({
         babelHelpers: 'bundled',
         exclude: 'node_modules/**',
