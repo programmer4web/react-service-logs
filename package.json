@@ -1,21 +1,23 @@
 {
   "name": "react-service-logs",
-  "version": "1.0.0",
-  "description": "Service logs",
+  "version": "1.0.1",
+  "description": "Service Log Manager - A React component for managing service logs with autosave and persistence",
+  "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "style": "dist/index.css",
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:lib": "yarn build:css && rollup -c rollup.config.js",
-    "build:css": "npx postcss src/output.css -o dist/index.css --verbose",
     "preview": "vite preview",
-    "prepublishOnly": "npm run build:lib"
+    "build:css": "npx postcss src/output.css -o dist/index.css",
+    "type-check": "tsc --noEmit",
+    "lint": "echo 'No linter configured'"
   },
   "peerDependencies": {
     "react": ">=16.8.0",

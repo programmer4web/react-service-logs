@@ -13,19 +13,22 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    lib: {
-      entry: 'src/index.js',
-      name: 'ReactServiceLogs',
-      fileName: (format) => `react-service-logs.${format}.js`
-    },
+    sourcemap: true,
+    // For library builds, you can uncomment this:
+    // lib: {
+    //   entry: 'src/index.js',
+    //   name: 'ReactServiceLogs',
+    //   fileName: (format) => `react-service-logs.${format}.js`
+    // },
     rollupOptions: {
-      external: ['react', 'react-dom'],
-      output: {
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM'
-        }
-      }
+      // For library builds, you can uncomment this:
+      // external: ['react', 'react-dom'],
+      // output: {
+      //   globals: {
+      //     react: 'React',
+      //     'react-dom': 'ReactDOM'
+      //   }
+      // }
     }
   }
 })
