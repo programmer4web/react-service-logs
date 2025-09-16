@@ -1,0 +1,62 @@
+{
+  "name": "react-service-logs",
+  "version": "1.0.0",
+  "description": "Service logs",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "style": "dist/index.css",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "yarn build:css && rollup -c rollup.config.js",
+    "build:css": "npx postcss src/output.css -o dist/index.css --verbose",
+    "dev": "rollup -c -w",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.22.5",
+    "@babel/preset-env": "^7.22.5",
+    "@babel/preset-react": "^7.22.5",
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-commonjs": "^25.0.2",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.1.0",
+    "@rollup/plugin-terser": "^0.4.3",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.24",
+    "postcss-cli": "^11.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "rollup": "^3.25.3",
+    "rollup-plugin-import-css": "^3.3.1",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-copy": "^3.5.0",
+    "tailwindcss": "^3.3.3"
+  },
+  "keywords": [
+    "react"
+  ],
+  "author": "Andrei-Constantin Alexandru",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/programmer4web/react-service-logs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/programmer4web/react-service-logs/issues"
+  },
+  "homepage": "https://github.com/programmer4web/react-service-logs#readme",
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "sideEffects": ["*.css"]
+}
